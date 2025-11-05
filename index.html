@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>词汇连连看 · Word Match Battle — 本地 + 在线实时排行榜</title>
+<style>
+:root{--bg1:#e8f9f1;--bg2:#d0f0df;--panel:#ffffff;--card:#ffffff;--accent:#16a34a;--accent2:#22c55e;--blue:#3b82f6;--ink:#0b3b2e;--muted:#537a6b;--danger:#dc2626;--shadow:0 8px 24px rgba(22,163,74,.12)}
+*{box-sizing:border-box}html,body{height:100%}body{margin:0;font-family:"Nunito",system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans",sans-serif;background:radial-gradient(1200px 600px at 10% -20%, var(--bg2) 0%, transparent 60%),radial-gradient(1200px 600px at 100% 120%, var(--bg2) 0%, transparent 60%),linear-gradient(180deg, var(--bg1), #fff);color:var(--ink);display:flex;flex-direction:column}
+header{display:flex;align-items:center;gap:12px;padding:12px 16px;position:sticky;top:0;background:#ffffffcc;border-bottom:1px solid #d6efe3;backdrop-filter:saturate(120%) blur(8px)}
+.badge{background:linear-gradient(135deg,var(--accent2),var(--accent));color:#fff;padding:4px 10px;border-radius:999px;font-weight:800}
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto;align-items:center}
+select,button,input{background:#fff;color:var(--ink);border:1px solid #cfe9dc;border-radius:12px;padding:8px 10px;font-size:14px;outline:none;transition:.2s;box-shadow:var(--shadow)}
+button.primary{background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;color:#fff;font-weight:800}
+button.ghost{background:#fff}
+.pill{background:#fff;border:1px solid #cfe9dc;border-radius:999px;padding:6px 10px;font-size:12px;box-shadow:var(--shadow)}
+main{width:min(1250px,96%);margin:14px auto 20px;display:grid;grid-template-columns:340px 1fr;gap:14px}
+@media (max-width:980px){main{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid #d6efe3;border-radius:16px;padding:12px;box-shadow:var(--shadow)}
+.panel h3{margin:0 0 10px;font-size:16px;color:#0f5132}
+.rowlabel{font-size:12px;color:var(--muted)}
+.meta{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.meta .card{background:#f6fff9;border:1px solid #d6efe3;border-radius:12px;padding:10px}
+.grid{position:relative}
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(180px,1fr));gap:12px}
+@media (max-width:1000px){.tiles{grid-template-columns:repeat(2,minmax(160px,1fr))}}
+.tile{background:var(--card);border:2px solid #d6efe3;border-radius:16px;padding:16px;min-height:120px;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:800;line-height:1.25;cursor:pointer;transition:transform .12s,border-color .2s;background-clip:padding-box}
+.tile:hover{transform:translateY(-2px)}
+.tile.selected{outline:3px solid var(--blue);border-color:var(--blue);box-shadow:0 0 0 5px rgba(59,130,246,.12) inset}
+.tile.matched{background:linear-gradient(145deg,#ecfff5,#d6f7e6);border-color:#b8eccf;color:#0b3b2e;opacity:.8}
+svg.links{position:absolute;inset:0;pointer-events:none}
+.score{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.textarea{width:100%;min-height:160px;background:#f6fff9;border:1px solid #d6efe3;border-radius:12px;padding:10px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px}
+.comboToast{position:fixed;left:50%;top:18%;transform:translate(-50%,-50%) scale(1);background:#065f46;color:#eafff5;padding:8px 14px;border-radius:999px;font-weight:900;opacity:0;transition:opacity .25s,transform .25s}
+.comboToast.show{opacity:1;transform:translate(-50%,-50%) scale(1.06)}
+.penaltyToast{position:fixed;left:50%;top:26%;transform:translate(-50%,-50%) scale(1);background:#7f1d1d;color:#ffecec;padding:8px 14px;border-radius:999px;font-weight:900;opacity:0;transition:opacity .25s,transform .25s}
+.penaltyToast.show{opacity:1;transform:translate(-50%,-50%) scale(1.06)}
+.liveBoard li{margin:2px 0}
+.small{font-size:12px;color:#0f5132}
+</style>
+</head>
+<body>
+  <header>
+    <span class="badge">Word Match Battle · 词汇连连看</span>
+    <h3 id="title" style="margin:0">Vocabulary Match Game（本地/在线双模式）</h3>
+    <div class="controls">
+      <span class="pill" id="lvlPill">Level 1</span>
+      <span class="pill" id="pairsPill">10 pairs</span>
+      <span class="pill"><span id="timeLeft">120</span>s</span>
+      <select id="mode">
+        <option value="cn-en">CN ⇄ EN</option>
+        <option value="en-def">EN ⇄ Definition</option>
+        <option value="assoc">Association</option>
+      </select>
+      <select id="players">
+        <option value="1">1 Player</option>
+        <option value="2">2 Players</option>
+        <option value="3">3 Players</option>
+        <option value="4">4 Players</option>
+        <option value="5">5 Players</option>
+        <option value="6">6 Players</option>
+      </select>
+      <input id="timer" type="number" min="0" value="120" title="Timer (seconds)"/>
+      <input id="seed" type="text" value="" placeholder="Room/Seed" title="Use same seed for same board" />
+      <button id="start" class="primary">Start 开始</button>
+      <button id="shuffle" class="ghost">Shuffle 洗牌</button>
+      <span class="pill" id="totalPill">Total 总积分: —</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h3>设置 / Setup</h3>
+      <div class="meta">
+        <div class="card">
+          <div class="rowlabel">Mode 模式</div>
+          <div id="statusMode">—</div>
+        </div>
+        <div class="card">
+          <div class="rowlabel">Turn 回合</div>
+          <div class="score" id="scoreWrap"></div>
+        </div>
+        <div class="card">
+          <div class="rowlabel">Live Leaderboard 实时排行</div>
+          <ol id="liveBoard" class="liveBoard rowlabel" style="margin:6px 0 0; padding-left:18px"></ol>
+        </div>
+      </div>
+
+      <h3 style="margin-top:10px">在线模式（50+ 并发）</h3>
+      <div class="meta">
+        <div class="card">
+          <div class="rowlabel">昵称 Name</div>
+          <input id="olName" placeholder="如：Alice" />
+        </div>
+        <div class="card">
+          <div class="rowlabel">房间号 Room ID（同学们填同一个）</div>
+          <input id="olRoom" placeholder="如：econ-10A" />
+        </div>
+        <div class="card">
+          <div class="rowlabel">状态 / Status</div>
+          <div id="olStatus" class="small">未连接 Not connected</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <button id="olJoin" class="primary">加入在线 Join</button>
+        <button id="olLeave" class="ghost">离开 Leave</button>
+      </div>
+
+      <h3 style="margin-top:10px">题库 / Dataset</h3>
+      <p class="rowlabel">可直接使用预置题库，或粘贴你自己的配对数据（term | 中文/定义，每行一对）：</p>
+      <textarea id="data" class="textarea" spellcheck="false"></textarea>
+      <p class="small">Tips: Start 生成关卡；Shuffle 仅重排当前关卡。支持连击与从第3关起的连错扣分。</p>
+    </section>
+
+    <section class="panel">
+      <h3>棋盘 / Board</h3>
+      <div id="board" class="grid" aria-live="polite">
+        <svg class="links" id="links" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div id="tiles" class="tiles"></div>
+      </div>
+    </section>
+  </main>
+
+  <div class="comboToast" id="comboToast">Combo x2!</div>
+  <div class="penaltyToast" id="penaltyToast">-1</div>
+
+<script type="module">
+'use strict';
+// ===== 嵌入的 Firebase 配置（已写死到文件中） =====
+const EMBEDDED_FB_CONFIG = {
+  apiKey: "AIzaSyD-UMbgWjRyDroRJ87XaKt-ZBEmWqoL6aE",
+  authDomain: "word-match-game-7edab.firebaseapp.com",
+  databaseURL: "https://word-match-game-7edab-default-rtdb.firebaseio.com",
+  projectId: "word-match-game-7edab",
+  storageBucket: "word-match-game-7edab.firebasestorage.app",
+  messagingSenderId: "1067109195215",
+  appId: "1:1067109195215:web:ac076863f4db3ecbea86ba",
+  measurementId: "G-98ELE2JDNK"
+};
+
+// ===== 基础工具 =====
+const $ = (id)=>document.getElementById(id);
+const setText = (id, t)=>{ const el=$(id); if(el) el.textContent=String(t); };
+
+// ===== 词库（示例） =====
+const samples={
+  'cn-en':`business | 企业：组织，用于生产商品和服务
+organisation | 组织：为特定目的而成立的群体
+Goods | 商品：有形产品，如手机或鞋子
+Services | 服务：无形产品，如银行或洗车
+Output | 产量：一个人、机器或工厂生产的数量
+Premises | 场所：商店或企业使用的建筑和土地
+Human resources | 人力资源：负责招聘、培训和员工事务的部门
+Consumer goods | 消费品：卖给普通人的商品和服务
+Producer goods | 生产资料：企业间交易的商品和服务
+Needs | 基本需求：人类生存的基本要求
+Wants | 欲望：对商品和服务的渴望
+Finite | 有限的：有界限的
+Scarce | 稀缺的：有限可得的资源
+Primary sector | 第一产业：农业、渔业、采矿业
+Secondary sector | 第二产业：制造业，将原材料转化为产品
+Tertiary sector | 第三产业：服务业，为个人或企业提供服务
+Private sector | 私营部门：由个人或团体拥有的企业
+Public sector | 公有部门：由政府拥有的企业
+Stakeholder | 利益相关者：对企业运营有兴趣的个人或团体
+Entrepreneur | 企业家：承担风险创办企业的人`,
+  'en-def':`business | an organisation producing goods or services to satisfy needs and wants
+organisation | a group formed for a particular purpose
+goods | physical products such as phones or shoes
+services | non-physical products such as banking or car washing
+output | the amount produced by a person, machine, or factory
+premises | buildings or land used by a business`,
+  'assoc':`needs | wants
+finite | infinite
+private sector | public sector
+primary sector | secondary sector
+secondary sector | tertiary sector`
+};
+
+// ===== 语言 & 模式 =====
+const modeEl=$('mode'); const dataEl=$('data'); const playersEl=$('players');
+function setModeStatus(){ const map={'cn-en':'CN⇄EN','en-def':'EN⇄DEF','assoc':'ASSOC'}; setText('statusMode', map[modeEl.value]||'—'); }
+
+// ===== 随机与关卡 =====
+const pairsPerLevel=10; let level=1; let rng=Math.random; let pool=[], fullDataset=[], currentPairs=[]; let phase='initial';
+function xmur3(str){let h=1779033703^str.length; for(let i=0;i<str.length;i++){h=Math.imul(h^str.charCodeAt(i),3432918353); h=(h<<13)|(h>>>19);} return function(){h=Math.imul(h^(h>>>16),2246822507); h=Math.imul(h^(h>>>13),3266489909); return (h^=h>>>16)>>>0;};}
+function mulberry32(a){return function(){let t=a+=0x6D2B79F5; t=Math.imul(t^(t>>>15),1|t); t^=t+Math.imul(t^(t>>>7),61|t); return ((t^(t>>>14))>>>0)/4294967296;};}
+function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(rng()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]];} return arr;}
+function parsePairs(raw){
+  const lines = raw.split(/\r?\n+/).map(s=>s.trim()).filter(Boolean);
+  const out=[];
+  for(const line of lines){
+    const parts=line.split('|');
+    if(parts.length>=2){
+      const a=(parts[0]||'').trim();
+      const b=(parts.slice(1).join('|')||'').trim();
+      if(a&&b) out.push([a,b]);
+    }
+  }
+  return out;
+}
+
+// ===== 难度与错题重练 =====
+let reviewQueue=[]; const usedKeys=new Set(); let poolEasy=[], poolMed=[], poolHard=[]; const pairStats={};
+function estimateDifficulty(a,b){const lenA=(a||'').replace(/[^A-Za-z\u4e00-\u9fa5]/g,'').length; const lenB=(b||'').replace(/[^A-Za-z\u4e00-\u9fa5]/g,'').length; return lenA*0.7+lenB*0.3;}
+function bucketize(){const scored=fullDataset.map((p,idx)=>({a:p[0],b:p[1],key:`K${idx}`,score:estimateDifficulty(p[0],p[1])})).sort((x,y)=>x.score-y.score); const n=scored.length; const q1=Math.floor(n/3), q2=Math.floor(n*2/3); poolEasy=scored.slice(0,q1); poolMed=scored.slice(q1,q2); poolHard=scored.slice(q2);} 
+function getDifficultyForLevel(lvl){ if(phase==='initial'){ if(lvl<=2) return 'easy'; if(lvl<=4) return 'med'; return 'hard'; } const mod=((lvl-1)%3); return ['easy','med','hard'][mod]; }
+function takeFromPool(arr,need){const res=[]; for(const it of arr){ if(res.length>=need) break; if(!usedKeys.has(it.key)) res.push(it);} return res; }
+
+// ===== DOM 元素 =====
+const tilesWrap=$('tiles'); const linksSvg=$('links');
+const timeLeftEl=$('timeLeft'); const lvlPill=$('lvlPill'); const pairsPill=$('pairsPill');
+const timerInput=$('timer'); const seedInput=$('seed'); const startBtn=$('start'); const shuffleBtn=$('shuffle');
+const totalPill=$('totalPill'); const liveBoard=$('liveBoard'); const comboToast=$('comboToast'); const penaltyToast=$('penaltyToast');
+
+// ===== 音效 =====
+let audioCtx=null; function ensureAudio(){ if(!audioCtx){ try{ audioCtx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } }
+function beep(freq=880,dur=120,type='sine',vol=0.05){ ensureAudio(); if(!audioCtx) return; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type=type; o.frequency.value=freq; g.gain.value=vol; o.connect(g); g.connect(audioCtx.destination); o.start(); setTimeout(()=>{ try{o.stop();}catch(e){} }, dur); }
+function vibrate(ms=120){ if(navigator.vibrate) try{ navigator.vibrate(ms); }catch(e){} }
+function showCombo(n){ if(n<=1) return; comboToast.textContent=`Combo x${n}! 连击${n}倍！`; comboToast.classList.add('show'); setTimeout(()=> comboToast.classList.remove('show'),700); }
+function showPenalty(txt='-1'){ penaltyToast.textContent = txt; penaltyToast.classList.add('show'); setTimeout(()=> penaltyToast.classList.remove('show'),650); }
+
+// ===== 对战状态（本地） =====
+let tiles=[], selected=[], timeLeft=0, timer=null, levelStartAt=0, players=1, turn=0, scores=[], streaks=[], wrongStreaks=[];
+function renderTotalPill(){ const parts=[]; for(let i=0;i<players;i++){ parts.push(`P${i+1} ${scores[i]||0}`); } totalPill.textContent=`${'总积分/Total'}: ${parts.join(' · ')}`; }
+function buildScorePills(){ const wrap=$('scoreWrap'); wrap.innerHTML=''; for(let i=0;i<players;i++){ const pill=document.createElement('span'); pill.className='pill'; pill.id=`pill-${i}`; pill.innerHTML='P'+(i+1)+': <b id="score-'+i+'">'+(scores[i]||0)+'</b>'; pill.style.borderColor=i===turn?'#93e4c5':'#cfe9dc'; wrap.appendChild(pill);} renderTotalPill(); renderLiveLeaderboard(); }
+function updateScorePills(){ for(let i=0;i<players;i++){ const sEl=$(`score-${i}`); if(sEl) sEl.textContent=String(scores[i]||0); const pill=$(`pill-${i}`); if(pill) pill.style.borderColor=i===turn?'#93e4c5':'#cfe9dc'; } renderTotalPill(); renderLiveLeaderboard(); }
+
+function centerOf(el){ const r=el.getBoundingClientRect(); const br=$('board').getBoundingClientRect(); return {x:r.left-br.left+r.width/2,y:r.top-br.top+r.height/2}; }
+function drawLink(elA,elB,ok){ const A=centerOf(elA),B=centerOf(elB); const line=document.createElementNS('http://www.w3.org/2000/svg','line'); line.setAttribute('x1',A.x); line.setAttribute('y1',A.y); line.setAttribute('x2',B.x); line.setAttribute('y2',B.y); line.setAttribute('stroke', ok?'#16a34a':'#dc2626'); line.setAttribute('stroke-width','5'); line.setAttribute('stroke-linecap','round'); linksSvg.appendChild(line); setTimeout(()=>{ line.style.transition='opacity .5s'; line.style.opacity='0'; setTimeout(()=> line.remove(),600); }, ok?600:300); }
+
+function dealLevel(){
+  const need=pairsPerLevel; let chosen=[];
+  while(reviewQueue.length && chosen.length<need){ const it=reviewQueue.shift(); if(it && !usedKeys.has(it.key)) chosen.push(it); }
+  const diff=getDifficultyForLevel(level); const src = diff==='easy'? poolEasy : diff==='med'? poolMed : poolHard; const remain=need - chosen.length; if(remain>0){ chosen = chosen.concat(takeFromPool(src, remain)); }
+  if(chosen.length<need){ const all=[...poolEasy,...poolMed,...poolHard]; for(const it of all){ if(chosen.length>=need) break; if(!usedKeys.has(it.key) && !chosen.find(x=>x.key===it.key)) chosen.push(it); } }
+  if(chosen.length===0 && pool.length){ const fb = pool.slice(0,Math.min(need,pool.length)).map((p,idx)=>({a:p[0],b:p[1],key:`F${level}-${idx}`})); chosen=fb; }
+  currentPairs = chosen.map(it=>[it.a,it.b]); chosen.forEach(it=> usedKeys.add(it.key));
+  tilesWrap.innerHTML=''; linksSvg.innerHTML=''; selected=[];
+  const flat=[]; currentPairs.forEach((p,idx)=>{ const key=`L${level}-${idx}`; const origKey = chosen[idx].key; flat.push({id:`${key}-a`,text:p[0],pair:key,origKey}); flat.push({id:`${key}-b`,text:p[1],pair:key,origKey}); });
+  shuffle(flat); tiles=flat;
+  for(const t of tiles){ const btn=document.createElement('button'); btn.className='tile'; btn.textContent=t.text; btn.dataset.id=t.id; btn.dataset.pair=t.pair; btn.dataset.orig=t.origKey; btn.addEventListener('click',()=>onSelect(btn)); tilesWrap.appendChild(btn); }
+  setText('lvlPill',`Level ${level} (${diff})`); setText('pairsPill',`${currentPairs.length} 对/pairs`);
+}
+
+function onSelect(el){
+  if(el.classList.contains('matched')) return; if(selected.includes(el)) return; el.classList.add('selected'); selected.push(el);
+  if(selected.length===2){ const [a,b]=selected; const match=a.dataset.pair===b.dataset.pair && a!==b; drawLink(a,b,match); setTimeout(()=>{
+      if(match){
+        a.classList.remove('selected'); b.classList.remove('selected'); a.classList.add('matched'); b.classList.add('matched');
+        streaks[turn]=(streaks[turn]||0)+1; const pts=1+Math.min(4,streaks[turn]-1); scores[turn]+=pts; wrongStreaks[turn]=0; updateScorePills(); // 本地
+        changeMyScore(pts); // —— 在线：同步加分
+        const c=centerOf(a); beep(920,120,'sine',0.06);
+      } else {
+        a.classList.remove('selected'); b.classList.remove('selected'); vibrate(120);
+        streaks[turn]=0; wrongStreaks[turn]=(wrongStreaks[turn]||0)+1; // 连错统计
+        if(level>=3 && wrongStreaks[turn]>=2){ scores[turn]=Math.max(0,(scores[turn]||0)-1); showPenalty('-1'); beep(220,120,'square',0.04); changeMyScore(-1); }
+        updateScorePills();
+        turn=(turn+1)%players;
+      }
+      selected=[]; const all=Array.from(document.querySelectorAll('.tile'));
+      if(all.length>0 && all.every(t=>t.classList.contains('matched'))){ clearInterval(timer); nextLevel(); }
+  },150); }
+}
+
+function startTimer(){ if(timer) clearInterval(timer); timeLeft=parseInt(timerInput.value||0)||0; setText('timeLeft', timeLeft); levelStartAt=Date.now(); if(timeLeft>0){ timer=setInterval(()=>{ timeLeft--; setText('timeLeft', timeLeft); if(timeLeft<=0){ clearInterval(timer); document.querySelectorAll('.tile').forEach(t=>t.disabled=true); nextLevel(); } },1000);} }
+
+function initPool(){ const raw=(dataEl && dataEl.value.trim()) || samples[modeEl.value]; const arr=parsePairs(raw); if(arr.length<2){ alert('请至少提供 2 对配对'); return false;} fullDataset=arr.slice(); pool=arr.slice(); shuffle(pool); bucketize(); reviewQueue=[]; usedKeys.clear(); return true; }
+function buildBoard(){ dealLevel(); }
+
+function startGame(){ let seedStr=(seedInput.value || new URLSearchParams(location.search).get('seed') || '').trim(); if(!seedStr){ seedStr=Math.random().toString(36).slice(2,8);} seedInput.value=seedStr; rng=mulberry32(xmur3(seedStr)()); players=parseInt(playersEl.value,10); scores=Array(players).fill(0); streaks=Array(players).fill(0); wrongStreaks=Array(players).fill(0); turn=0; buildScorePills(); phase='initial'; level=1; if(!initPool()) return; setModeStatus(); timerInput.value=120; buildBoard(); startTimer(); }
+function nextLevel(){ level++; if(phase==='initial' && pool.length===0){ phase='timed'; timerInput.value=120; } buildBoard(); startTimer(); }
+
+// ===== 在线：Firebase 同步（50+ 并发排行榜） =====
+let fbApp=null, fbAuth=null, fbDB=null, myUID=null, myName='', myRoom='', fbReady=false; 
+const fbCDN = {
+  app: 'https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js',
+  auth: 'https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js',
+  db: 'https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js'
+};
+
+async function fbEnsure(){ 
+  if(fbReady) return true; 
+  const cfg = EMBEDDED_FB_CONFIG; // 直接使用嵌入配置
+  const { initializeApp } = await import(fbCDN.app); 
+  const { getAuth, signInAnonymously, onAuthStateChanged } = await import(fbCDN.auth); 
+  const { getDatabase } = await import(fbCDN.db);
+  fbApp = initializeApp(cfg); fbAuth=getAuth(fbApp); fbDB=getDatabase(fbApp); 
+  await signInAnonymously(fbAuth); 
+  await new Promise(res=>{ onAuthStateChanged(fbAuth, u=>{ if(u){ myUID=u.uid; res(); } }); }); 
+  fbReady=true; 
+  return true; 
+}
+
+function renderLiveLeaderboard(){
+  // 在 onValue 里填充，这里保持占位
+  const parts=[]; for(let i=0;i<players;i++){ parts.push(`P${i+1} ${scores[i]||0}`); } // 本地占位
+  // liveBoard.innerHTML = parts.map((t,i)=>`<li>${i+1}. ${t}</li>`).join('');
+}
+
+async function olJoin(){ 
+  if(!(await fbEnsure())) return; 
+  myName=($('olName').value||'Player').trim().slice(0,24); 
+  myRoom=($('olRoom').value||'room').trim().replace(/[^a-zA-Z0-9_-]/g,''); 
+  if(!myRoom){ alert('请输入房间号'); return; }
+  const { ref, set, onValue, onDisconnect, serverTimestamp } = await import(fbCDN.db);
+  const base=`rooms/${myRoom}`; 
+  const playerRef=ref(fbDB, `${base}/players/${myUID}`); 
+  await set(playerRef, { name: myName, online:true, joinedAt: serverTimestamp() }); 
+  try{ onDisconnect(playerRef).update({ online:false, lastSeen: serverTimestamp() }); }catch(e){}
+  const scoresRef=ref(fbDB, `${base}/scores`);
+  onValue(scoresRef, (snap)=>{ 
+    const val=snap.val()||{}; 
+    const rows = Object.entries(val).map(([uid,v])=>({ uid, name:v.name||'P', score:Number(v.score||0) })); 
+    rows.sort((a,b)=>b.score-a.score); 
+    liveBoard.innerHTML = rows.map((r,i)=>`<li>${i+1}. ${r.name} — ${r.score} pts${r.uid===myUID?' ⭐':''}</li>`).join(''); 
+    setText('olStatus',`房间 ${myRoom} · 在线人数 ${rows.length}`); 
+  });
+}
+
+async function olLeave(){ 
+  if(!fbReady||!myRoom||!myUID) return; 
+  const { ref, update } = await import(fbCDN.db); 
+  await update(ref(fbDB, `rooms/${myRoom}/players/${myUID}`), { online:false }); 
+  setText('olStatus','已离开 Left'); 
+}
+
+async function changeMyScore(delta){ 
+  if(!fbReady||!myRoom||!myUID) return; 
+  const { ref, get, set } = await import(fbCDN.db); 
+  const myRef=ref(fbDB, `rooms/${myRoom}/scores/${myUID}`); 
+  const snap=await get(myRef); 
+  const cur=snap.exists()?Number(snap.val().score||0):0; 
+  await set(myRef,{ name: myName||'Player', score: Math.max(0, cur + Number(delta||0)) }); 
+}
+
+// ===== 事件绑定 =====
+window.addEventListener('DOMContentLoaded',()=>{
+  modeEl.addEventListener('change',()=>{ if(dataEl) dataEl.value=samples[modeEl.value]||''; setModeStatus(); });
+  startBtn.addEventListener('click', startGame);
+  shuffleBtn.addEventListener('click', buildBoard);
+  dataEl.value = samples[modeEl.value]; setModeStatus();
+
+  $('olJoin').addEventListener('click', olJoin);
+  $('olLeave').addEventListener('click', olLeave);
+});
+</script>
+</body>
+</html>
