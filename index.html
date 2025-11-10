@@ -3,56 +3,137 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>词汇连连看 · Word Match Battle — 本地 + 在线实时排行榜</title>
+<title>词汇连连看 · Candy / Green 皮肤 + 音效 + 彩带雨</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
 <style>
-:root{--bg1:#e8f9f1;--bg2:#d0f0df;--panel:#ffffff;--card:#ffffff;--accent:#16a34a;--accent2:#22c55e;--blue:#3b82f6;--ink:#0b3b2e;--muted:#537a6b;--danger:#dc2626;--shadow:0 8px 24px rgba(22,163,74,.12)}
-*{box-sizing:border-box}html,body{height:100%}body{margin:0;font-family:"Nunito",system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans",sans-serif;background:radial-gradient(1200px 600px at 10% -20%, var(--bg2) 0%, transparent 60%),radial-gradient(1200px 600px at 100% 120%, var(--bg2) 0%, transparent 60%),linear-gradient(180deg, var(--bg1), #fff);color:var(--ink);display:flex;flex-direction:column}
-header{display:flex;align-items:center;gap:12px;padding:12px 16px;position:sticky;top:0;background:#ffffffcc;border-bottom:1px solid #d6efe3;backdrop-filter:saturate(120%) blur(8px)}
-.badge{background:linear-gradient(135deg,var(--accent2),var(--accent));color:#fff;padding:4px 10px;border-radius:999px;font-weight:800}
-.controls{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto;align-items:center}
-select,button,input{background:#fff;color:var(--ink);border:1px solid #cfe9dc;border-radius:12px;padding:8px 10px;font-size:14px;outline:none;transition:.2s;box-shadow:var(--shadow)}
-button.primary{background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;color:#fff;font-weight:800}
+:root{
+  --ink:#18324a;
+  --muted:#607089;
+  --shadow:0 10px 26px rgba(0,0,0,.08);
+  --tile-radius:18px;
+}
+/* ========== Candy 主题（默认） ========== */
+body[data-theme="candy"]{
+  --bg-top:#fdf6ff; --bg-mid:#f6fbff; --bg-bot:#f1fff7;
+  --panel:#ffffff; --tile:#ffffff;
+  --accent:#ff62b0; --accent2:#ffa4d1; --accent-emer:#10b981; --blue:#6aa9ff; --danger:#ef4444;
+  --border-soft:rgba(255,98,176,.25);
+  --border-card:rgba(255,98,176,.22);
+  --progress-a:#ff66b5; --progress-b:#ff9bd2;
+}
+/* ========== 绿色清新主题 ========== */
+body[data-theme="green"]{
+  --bg-top:#ecfff7; --bg-mid:#f7fffb; --bg-bot:#ffffff;
+  --panel:#ffffff; --tile:#ffffff;
+  --accent:#16a34a; --accent2:#22c55e; --accent-emer:#0ea5e9; --blue:#3b82f6; --danger:#dc2626;
+  --border-soft:#cfe9dc; --border-card:#d6efe3;
+  --progress-a:#34d399; --progress-b:#10b981;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; font-family:"Nunito",system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans",sans-serif;
+  color:var(--ink);
+  background:
+   radial-gradient(1200px 600px at 10% -20%, rgba(255,196,229,.28) 0%, transparent 60%),
+   radial-gradient(1200px 600px at 100% 120%, rgba(186,230,253,.28) 0%, transparent 60%),
+   linear-gradient(180deg,var(--bg-top),var(--bg-mid) 60%,var(--bg-bot));
+  display:flex;flex-direction:column; overflow-x:hidden;
+}
+/* header */
+header{display:flex;align-items:center;gap:12px;padding:12px 16px;position:sticky;top:0;background:rgba(255,255,255,.7);border-bottom:1px solid var(--border-soft);backdrop-filter:saturate(130%) blur(10px)}
+.brand{display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:12px;background:linear-gradient(135deg,var(--accent2),var(--accent));color:#fff;box-shadow:0 8px 20px rgba(0,0,0,.08)}
+.logo{width:26px;height:26px;border-radius:8px;background:rgba(255,255,255,.2);display:grid;place-items:center;font-weight:900}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-left:auto;align-items:center}
+select,button,input{background:#fff;color:var(--ink);border:1px solid var(--border-soft);border-radius:14px;padding:9px 12px;font-size:14px;outline:none;transition:.2s;box-shadow:0 6px 18px rgba(0,0,0,.06)}
+button.primary{background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;color:#fff;font-weight:900;letter-spacing:.2px}
 button.ghost{background:#fff}
-.pill{background:#fff;border:1px solid #cfe9dc;border-radius:999px;padding:6px 10px;font-size:12px;box-shadow:var(--shadow)}
-main{width:min(1250px,96%);margin:14px auto 20px;display:grid;grid-template-columns:340px 1fr;gap:14px}
+button:hover{transform:translateY(-1px)}
+.pill{background:#fff;border:1px solid var(--border-soft);border-radius:999px;padding:7px 12px;font-size:12px;box-shadow:0 6px 18px rgba(0,0,0,.05)}
+
+main{width:min(1250px,96%);margin:14px auto 26px;display:grid;grid-template-columns:360px 1fr;gap:16px}
 @media (max-width:980px){main{grid-template-columns:1fr}}
-.panel{background:var(--panel);border:1px solid #d6efe3;border-radius:16px;padding:12px;box-shadow:var(--shadow)}
-.panel h3{margin:0 0 10px;font-size:16px;color:#0f5132}
+.panel{background:var(--panel);border:1px solid var(--border-card);border-radius:18px;padding:14px;box-shadow:var(--shadow)}
+.panel h3{margin:0 0 12px;font-size:16px;color:var(--accent);letter-spacing:.2px}
 .rowlabel{font-size:12px;color:var(--muted)}
-.meta{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.meta .card{background:#f6fff9;border:1px solid #d6efe3;border-radius:12px;padding:10px}
+.meta{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.meta .card{background:linear-gradient(180deg,#fff,#fff8fb);border:1px solid var(--border-card);border-radius:14px;padding:10px}
 .grid{position:relative}
-.tiles{display:grid;grid-template-columns:repeat(3,minmax(180px,1fr));gap:12px}
+#board{
+  background:
+    radial-gradient(400px 160px at 10% 10%, rgba(255,240,250,.9), transparent 60%),
+    radial-gradient(500px 200px at 90% 90%, rgba(240,253,250,.9), transparent 70%);
+  min-height:420px;border-radius:16px; overflow:hidden;
+}
+/* hud */
+.hud{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:6px 0 12px}
+.hud-left{display:flex;align-items:center;gap:12px}
+.progress{position:relative;width:280px;height:14px;background:linear-gradient(180deg,#fff0f8,#f2faff);border:1px solid var(--border-soft);border-radius:999px;box-shadow:inset 0 2px 6px rgba(0,0,0,.06)}
+.progress-inner{position:absolute;left:0;top:0;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--progress-a),var(--progress-b));box-shadow:0 2px 6px rgba(0,0,0,.06)}
+.progress span{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:12px;color:#a00656;font-weight:800}
+.comboChip{background:linear-gradient(135deg,#fff0f8,#ffe3f2);border:1px solid var(--border-soft);border-radius:999px;padding:6px 12px;font-weight:900;color:#a00656;box-shadow:0 8px 18px rgba(0,0,0,.05)}
+.iconbtn{border:1px solid var(--border-soft);border-radius:12px;background:#fff;padding:8px 12px;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.05)}
+.iconbtn.off{opacity:.6}
+
+/* tiles */
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(200px,1fr));gap:14px}
 @media (max-width:1000px){.tiles{grid-template-columns:repeat(2,minmax(160px,1fr))}}
-.tile{background:var(--card);border:2px solid #d6efe3;border-radius:16px;padding:16px;min-height:120px;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:800;line-height:1.25;cursor:pointer;transition:transform .12s,border-color .2s;background-clip:padding-box}
-.tile:hover{transform:translateY(-2px)}
-.tile.selected{outline:3px solid var(--blue);border-color:var(--blue);box-shadow:0 0 0 5px rgba(59,130,246,.12) inset}
-.tile.matched{background:linear-gradient(145deg,#ecfff5,#d6f7e6);border-color:#b8eccf;color:#0b3b2e;opacity:.8}
+.tile{
+  position:relative; background:linear-gradient(180deg,#ffffff,#fff2f8);
+  border:2px solid var(--border-soft); border-radius:var(--tile-radius);
+  padding:18px;min-height:124px;display:flex;align-items:center;justify-content:center;text-align:center;
+  font-weight:900;line-height:1.25;cursor:pointer;
+  transition:transform .12s,border-color .2s,opacity .25s,box-shadow .2s,filter .2s;
+  box-shadow:0 8px 22px rgba(0,0,0,.06), inset 0 2px 0 rgba(255,255,255,.95);
+  overflow:hidden; transform:scale(.98); opacity:0; /* for入场动效 */
+}
+.tile.appear{animation:tileIn .35s ease both}
+@keyframes tileIn{0%{transform:scale(.85);opacity:0} 100%{transform:scale(1);opacity:1}}
+.tile:before{content:""; position:absolute; left:-30%; top:-50%; width:160%; height:140%; background:radial-gradient(ellipse at 20% 20%, rgba(255,255,255,.6), transparent 40%); transform:rotate(12deg)}
+.tile:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(0,0,0,.12)}
+.tile.selected{outline:3px solid var(--blue); border-color:var(--blue); box-shadow:0 0 0 6px rgba(0,0,0,.06) inset, 0 10px 26px rgba(0,0,0,.12); filter:saturate(1.05)}
+.tile.matched{background:linear-gradient(145deg,#ecfff5,#ffe6f4); border-color:#b8eccf; color:#0b3b2e; opacity:.92; animation:candyPulse .45s ease}
+@keyframes candyPulse{0%{transform:scale(1)}50%{transform:scale(1.03)}100%{transform:scale(1)}}
 svg.links{position:absolute;inset:0;pointer-events:none}
+
 .score{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
-.textarea{width:100%;min-height:160px;background:#f6fff9;border:1px solid #d6efe3;border-radius:12px;padding:10px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px}
-.comboToast{position:fixed;left:50%;top:18%;transform:translate(-50%,-50%) scale(1);background:#065f46;color:#eafff5;padding:8px 14px;border-radius:999px;font-weight:900;opacity:0;transition:opacity .25s,transform .25s}
+.textarea{width:100%;min-height:160px;background:#fff7fb;border:1px solid var(--border-card);border-radius:12px;padding:10px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px}
+
+/* toasts */
+.comboToast{position:fixed;left:50%;top:18%;transform:translate(-50%,-50%) scale(1);background:#a00656;color:#ffeef7;padding:10px 16px;border-radius:999px;font-weight:900;opacity:0;transition:opacity .25s,transform .25s;box-shadow:0 10px 26px rgba(0,0,0,.08)}
 .comboToast.show{opacity:1;transform:translate(-50%,-50%) scale(1.06)}
-.penaltyToast{position:fixed;left:50%;top:26%;transform:translate(-50%,-50%) scale(1);background:#7f1d1d;color:#ffecec;padding:8px 14px;border-radius:999px;font-weight:900;opacity:0;transition:opacity .25s,transform .25s}
+.penaltyToast{position:fixed;left:50%;top:26%;transform:translate(-50%,-50%) scale(1);background:#7f1d1d;color:#ffecec;padding:8px 14px;border-radius:999px;font-weight:900;opacity:0;transition:opacity .25s,transform .25s;box-shadow:0 10px 26px rgba(0,0,0,.08)}
 .penaltyToast.show{opacity:1;transform:translate(-50%,-50%) scale(1.06)}
+
 .liveBoard li{margin:2px 0}
-.small{font-size:12px;color:#0f5132}
+.small{font-size:12px;color:#b3126c}
+.panel .meta .card input{width:100%}
+
+/* confetti 基础样式 */
+.confetti{
+  position:absolute; width:10px; height:14px; will-change:transform,opacity;
+  top:-20px; opacity:0.9; pointer-events:none;
+  border-radius:2px;
+}
 </style>
 </head>
-<body>
+<body data-theme="candy">
   <header>
-    <span class="badge">Word Match Battle · 词汇连连看</span>
-    <h3 id="title" style="margin:0">Vocabulary Match Game（本地/在线双模式）</h3>
+    <div class="brand"><span class="logo">🍬</span> <b>Word Match</b></div>
+    <h3 id="title" style="margin:0 0 0 6px">词汇连连看 · Candy / Green 皮肤（本地/在线）</h3>
     <div class="controls">
       <span class="pill" id="lvlPill">Level 1</span>
       <span class="pill" id="pairsPill">10 pairs</span>
       <span class="pill"><span id="timeLeft">120</span>s</span>
-      <select id="mode">
+      <select id="mode" title="模式">
         <option value="cn-en">CN ⇄ EN</option>
         <option value="en-def">EN ⇄ Definition</option>
         <option value="assoc">Association</option>
       </select>
-      <select id="players">
+      <select id="players" title="玩家数">
         <option value="1">1 Player</option>
         <option value="2">2 Players</option>
         <option value="3">3 Players</option>
@@ -62,6 +143,10 @@ svg.links{position:absolute;inset:0;pointer-events:none}
       </select>
       <input id="timer" type="number" min="0" value="120" title="Timer (seconds)"/>
       <input id="seed" type="text" value="" placeholder="Room/Seed" title="Use same seed for same board" />
+      <select id="theme" title="皮肤">
+        <option value="candy">🍬 Candy</option>
+        <option value="green">🌿 Green</option>
+      </select>
       <button id="start" class="primary">Start 开始</button>
       <button id="shuffle" class="ghost">Shuffle 洗牌</button>
       <span class="pill" id="totalPill">Total 总积分: —</span>
@@ -94,7 +179,9 @@ svg.links{position:absolute;inset:0;pointer-events:none}
         </div>
         <div class="card">
           <div class="rowlabel">房间号 Room ID（同学们填同一个）</div>
-          <input id="olRoom" placeholder="如：econ-10A" />
+          <input id="olRoom" placeholder="如：econ-10A" list="recentRooms" />
+          <datalist id="recentRooms"></datalist>
+          <div class="small">可从下拉中选择你这个名字使用过的房间</div>
         </div>
         <div class="card">
           <div class="rowlabel">状态 / Status</div>
@@ -102,9 +189,14 @@ svg.links{position:absolute;inset:0;pointer-events:none}
         </div>
       </div>
       <div style="display:flex;gap:8px;margin-top:6px">
+        <button id="olApplyCfg" class="ghost">粘贴 Firebase 配置</button>
         <button id="olJoin" class="primary">加入在线 Join</button>
         <button id="olLeave" class="ghost">离开 Leave</button>
       </div>
+      <details style="margin-top:6px"><summary class="rowlabel">查看/修改 Firebase 配置 JSON</summary>
+        <textarea id="olCfg" class="textarea" placeholder='{"apiKey":"...","authDomain":"...","databaseURL":"...","projectId":"...","appId":"..."}'></textarea>
+        <div class="small">建议：开启 <b>Anonymous Auth</b>，Realtime Database 使用推荐规则。</div>
+      </details>
 
       <h3 style="margin-top:10px">题库 / Dataset</h3>
       <p class="rowlabel">可直接使用预置题库，或粘贴你自己的配对数据（term | 中文/定义，每行一对）：</p>
@@ -114,6 +206,16 @@ svg.links{position:absolute;inset:0;pointer-events:none}
 
     <section class="panel">
       <h3>棋盘 / Board</h3>
+      <div class="hud">
+        <div class="hud-left">
+          <div class="progress" id="progOuter" aria-label="Progress">
+            <div class="progress-inner" id="progInner" style="width:0%"></div>
+            <span id="progText">0%</span>
+          </div>
+          <span class="comboChip" id="comboChip" aria-live="polite">Combo x1</span>
+        </div>
+        <button class="iconbtn" id="sndBtn" title="Sound on/off">🔊</button>
+      </div>
       <div id="board" class="grid" aria-live="polite">
         <svg class="links" id="links" xmlns="http://www.w3.org/2000/svg"></svg>
         <div id="tiles" class="tiles"></div>
@@ -124,25 +226,21 @@ svg.links{position:absolute;inset:0;pointer-events:none}
   <div class="comboToast" id="comboToast">Combo x2!</div>
   <div class="penaltyToast" id="penaltyToast">-1</div>
 
-<script type="module">
+<script>
 'use strict';
-// ===== 嵌入的 Firebase 配置（已写死到文件中） =====
-const EMBEDDED_FB_CONFIG = {
-  apiKey: "AIzaSyD-UMbgWjRyDroRJ87XaKt-ZBEmWqoL6aE",
-  authDomain: "word-match-game-7edab.firebaseapp.com",
-  databaseURL: "https://word-match-game-7edab-default-rtdb.firebaseio.com",
-  projectId: "word-match-game-7edab",
-  storageBucket: "word-match-game-7edab.firebasestorage.app",
-  messagingSenderId: "1067109195215",
-  appId: "1:1067109195215:web:ac076863f4db3ecbea86ba",
-  measurementId: "G-98ELE2JDNK"
-};
-
-// ===== 基础工具 =====
 const $ = (id)=>document.getElementById(id);
 const setText = (id, t)=>{ const el=$(id); if(el) el.textContent=String(t); };
 
-// ===== 词库（示例） =====
+/* 主题切换 */
+const themeEl = $('theme');
+function applyTheme(v){
+  document.body.setAttribute('data-theme', v);
+  localStorage.setItem('wmb_theme', v);
+}
+themeEl?.addEventListener('change', ()=>applyTheme(themeEl.value));
+(function initTheme(){ const t=localStorage.getItem('wmb_theme')||'candy'; if(themeEl) themeEl.value=t; applyTheme(t); })();
+
+/* 题库示例 */
 const samples={
   'cn-en':`business | 企业：组织，用于生产商品和服务
 organisation | 组织：为特定目的而成立的群体
@@ -177,18 +275,17 @@ primary sector | secondary sector
 secondary sector | tertiary sector`
 };
 
-// ===== 语言 & 模式 =====
 const modeEl=$('mode'); const dataEl=$('data'); const playersEl=$('players');
 function setModeStatus(){ const map={'cn-en':'CN⇄EN','en-def':'EN⇄DEF','assoc':'ASSOC'}; setText('statusMode', map[modeEl.value]||'—'); }
 
-// ===== 随机与关卡 =====
+/* 随机 & 关卡 */
 const pairsPerLevel=10; let level=1; let rng=Math.random; let pool=[], fullDataset=[], currentPairs=[]; let phase='initial';
 function xmur3(str){let h=1779033703^str.length; for(let i=0;i<str.length;i++){h=Math.imul(h^str.charCodeAt(i),3432918353); h=(h<<13)|(h>>>19);} return function(){h=Math.imul(h^(h>>>16),2246822507); h=Math.imul(h^(h>>>13),3266489909); return (h^=h>>>16)>>>0;};}
 function mulberry32(a){return function(){let t=a+=0x6D2B79F5; t=Math.imul(t^(t>>>15),1|t); t^=t+Math.imul(t^(t>>>7),61|t); return ((t^(t>>>14))>>>0)/4294967296;};}
 function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(rng()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]];} return arr;}
 function parsePairs(raw){
-  const lines = raw.split(/\r?\n+/).map(s=>s.trim()).filter(Boolean);
-  const out=[];
+  const lines = String(raw||'').split(/\r?\n+/).map(s=>s.trim()).filter(Boolean);
+  const out=[]; 
   for(const line of lines){
     const parts=line.split('|');
     if(parts.length>=2){
@@ -200,34 +297,168 @@ function parsePairs(raw){
   return out;
 }
 
-// ===== 难度与错题重练 =====
-let reviewQueue=[]; const usedKeys=new Set(); let poolEasy=[], poolMed=[], poolHard=[]; const pairStats={};
+/* 难度与错题 */
+let reviewQueue=[]; const usedKeys=new Set(); let poolEasy=[], poolMed=[], poolHard=[];
 function estimateDifficulty(a,b){const lenA=(a||'').replace(/[^A-Za-z\u4e00-\u9fa5]/g,'').length; const lenB=(b||'').replace(/[^A-Za-z\u4e00-\u9fa5]/g,'').length; return lenA*0.7+lenB*0.3;}
 function bucketize(){const scored=fullDataset.map((p,idx)=>({a:p[0],b:p[1],key:`K${idx}`,score:estimateDifficulty(p[0],p[1])})).sort((x,y)=>x.score-y.score); const n=scored.length; const q1=Math.floor(n/3), q2=Math.floor(n*2/3); poolEasy=scored.slice(0,q1); poolMed=scored.slice(q1,q2); poolHard=scored.slice(q2);} 
 function getDifficultyForLevel(lvl){ if(phase==='initial'){ if(lvl<=2) return 'easy'; if(lvl<=4) return 'med'; return 'hard'; } const mod=((lvl-1)%3); return ['easy','med','hard'][mod]; }
 function takeFromPool(arr,need){const res=[]; for(const it of arr){ if(res.length>=need) break; if(!usedKeys.has(it.key)) res.push(it);} return res; }
 
-// ===== DOM 元素 =====
+/* DOM */
 const tilesWrap=$('tiles'); const linksSvg=$('links');
-const timeLeftEl=$('timeLeft'); const lvlPill=$('lvlPill'); const pairsPill=$('pairsPill');
+const lvlPill=$('lvlPill'); const pairsPill=$('pairsPill');
 const timerInput=$('timer'); const seedInput=$('seed'); const startBtn=$('start'); const shuffleBtn=$('shuffle');
 const totalPill=$('totalPill'); const liveBoard=$('liveBoard'); const comboToast=$('comboToast'); const penaltyToast=$('penaltyToast');
+const progInner=$('progInner'); const progText=$('progText'); const comboChip=$('comboChip'); const sndBtn=$('sndBtn');
 
-// ===== 音效 =====
-let audioCtx=null; function ensureAudio(){ if(!audioCtx){ try{ audioCtx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } }
-function beep(freq=880,dur=120,type='sine',vol=0.05){ ensureAudio(); if(!audioCtx) return; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type=type; o.frequency.value=freq; g.gain.value=vol; o.connect(g); g.connect(audioCtx.destination); o.start(); setTimeout(()=>{ try{o.stop();}catch(e){} }, dur); }
+/* 音效包（WebAudio 简易合成） */
+let audioCtx=null; let soundOn=true;
+function ensureAudio(){ if(!audioCtx && soundOn){ try{ audioCtx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } }
+function toggleSound(){ soundOn=!soundOn; if(sndBtn){ sndBtn.classList.toggle('off', !soundOn); sndBtn.textContent = soundOn ? '🔊' : '🔇'; } }
+function tone(freq=440,dur=140,type='sine',vol=0.05, when=0){
+  if(!soundOn) return; ensureAudio(); if(!audioCtx) return;
+  const o=audioCtx.createOscillator(); const g=audioCtx.createGain();
+  o.type=type; o.frequency.value=freq; g.gain.value=vol;
+  const t0=audioCtx.currentTime+when;
+  o.connect(g); g.connect(audioCtx.destination);
+  // ADSR-ish
+  g.gain.setValueAtTime(0,t0);
+  g.gain.linearRampToValueAtTime(vol,t0+0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001,t0+dur/1000);
+  o.start(t0); o.stop(t0+dur/1000);
+}
+function sfxCorrect(){ // 上扬三音
+  tone(620,130,'sine',0.05,0); tone(780,130,'triangle',0.05,0.08); tone(930,160,'sine',0.05,0.16);
+}
+function sfxError(){ // 低频颤音
+  tone(220,220,'square',0.04,0); tone(180,220,'square',0.035,0.02);
+}
+function sfxCombo(n=2){ // 颤音短跑
+  const base = 900; for(let i=0;i<n;i++){ tone(base+i*60,90,'sawtooth',0.04,i*0.05); }
+}
 function vibrate(ms=120){ if(navigator.vibrate) try{ navigator.vibrate(ms); }catch(e){} }
 function showCombo(n){ if(n<=1) return; comboToast.textContent=`Combo x${n}! 连击${n}倍！`; comboToast.classList.add('show'); setTimeout(()=> comboToast.classList.remove('show'),700); }
-function showPenalty(txt='-1'){ penaltyToast.textContent = txt; penaltyToast.classList.add('show'); setTimeout(()=> penaltyToast.classList.remove('show'),650); }
 
-// ===== 对战状态（本地） =====
-let tiles=[], selected=[], timeLeft=0, timer=null, levelStartAt=0, players=1, turn=0, scores=[], streaks=[], wrongStreaks=[];
-function renderTotalPill(){ const parts=[]; for(let i=0;i<players;i++){ parts.push(`P${i+1} ${scores[i]||0}`); } totalPill.textContent=`${'总积分/Total'}: ${parts.join(' · ')}`; }
-function buildScorePills(){ const wrap=$('scoreWrap'); wrap.innerHTML=''; for(let i=0;i<players;i++){ const pill=document.createElement('span'); pill.className='pill'; pill.id=`pill-${i}`; pill.innerHTML='P'+(i+1)+': <b id="score-'+i+'">'+(scores[i]||0)+'</b>'; pill.style.borderColor=i===turn?'#93e4c5':'#cfe9dc'; wrap.appendChild(pill);} renderTotalPill(); renderLiveLeaderboard(); }
-function updateScorePills(){ for(let i=0;i<players;i++){ const sEl=$(`score-${i}`); if(sEl) sEl.textContent=String(scores[i]||0); const pill=$(`pill-${i}`); if(pill) pill.style.borderColor=i===turn?'#93e4c5':'#cfe9dc'; } renderTotalPill(); renderLiveLeaderboard(); }
+/* 扣分提示（棋盘内） */
+function showPenalty(txt='-1'){
+  penaltyToast.textContent = txt;
+  const board=$('board');
+  if(board && penaltyToast.parentNode!==board){ board.appendChild(penaltyToast); }
+  penaltyToast.style.position='absolute';
+  penaltyToast.style.left='50%';
+  penaltyToast.style.top='12px';
+  penaltyToast.style.transform='translate(-50%,0)';
+  penaltyToast.classList.add('show');
+  setTimeout(()=> penaltyToast.classList.remove('show'),650);
+}
 
+/* 几何/特效 */
 function centerOf(el){ const r=el.getBoundingClientRect(); const br=$('board').getBoundingClientRect(); return {x:r.left-br.left+r.width/2,y:r.top-br.top+r.height/2}; }
-function drawLink(elA,elB,ok){ const A=centerOf(elA),B=centerOf(elB); const line=document.createElementNS('http://www.w3.org/2000/svg','line'); line.setAttribute('x1',A.x); line.setAttribute('y1',A.y); line.setAttribute('x2',B.x); line.setAttribute('y2',B.y); line.setAttribute('stroke', ok?'#16a34a':'#dc2626'); line.setAttribute('stroke-width','5'); line.setAttribute('stroke-linecap','round'); linksSvg.appendChild(line); setTimeout(()=>{ line.style.transition='opacity .5s'; line.style.opacity='0'; setTimeout(()=> line.remove(),600); }, ok?600:300); }
+function midPoint(a,b){ const A=centerOf(a), B=centerOf(b); return { x:(A.x+B.x)/2, y:(A.y+B.y)/2 }; }
+function spawnBubbles(x,y,count=18){
+  const board=$('board'); const br=board.getBoundingClientRect(); const relX=x-br.left; const relY=y-br.top;
+  const frag=document.createDocumentFragment();
+  for(let i=0;i<count;i++){
+    const d=document.createElement('div');
+    d.className='bubble'; d.style.position='absolute'; d.style.left=relX+'px'; d.style.top=relY+'px';
+    const s=6+Math.random()*10; d.style.width=s+'px'; d.style.height=s+'px'; d.style.borderRadius='50%';
+    d.style.background=['#ffd1ec','#c7e1ff','#d1fae5','#fee2e2'][i%4];
+    d.style.boxShadow='0 2px 10px rgba(0,0,0,.08)'; d.style.pointerEvents='none'; d.style.zIndex=10;
+    const dx=(Math.random()*2-1)*80; const dy=-60-Math.random()*60;
+    d.animate([{transform:'translate(0,0) scale(1)',opacity:.95},{transform:`translate(${dx}px,${dy}px) scale(${1.2+Math.random()*0.6})`,opacity:0}],{duration:720+Math.random()*420,easing:'cubic-bezier(.2,.8,.2,1)'});
+    setTimeout(()=>d.remove(),1300);
+    frag.appendChild(d);
+  }
+  board.appendChild(frag);
+}
+function spawnBomb(x,y,count=24){
+  const board = $('board'); const br = board.getBoundingClientRect(); const relX = x - br.left; const relY = y - br.top;
+  const frag=document.createDocumentFragment();
+  for(let i=0;i<count;i++){
+    const d=document.createElement('div');
+    d.className='bomb'; d.style.position='absolute'; d.style.left=relX+'px'; d.style.top=relY+'px';
+    const s=4+Math.random()*6; d.style.width=s+'px'; d.style.height=s+'px'; d.style.borderRadius='50%'; d.style.background=['#ff6b6b','#f97316','#fb7185','#ef4444'][i%4];
+    d.style.pointerEvents='none'; d.style.zIndex=12;
+    const ang=Math.random()*Math.PI*2; const dist=50+Math.random()*70; const tx=Math.cos(ang)*dist; const ty=Math.sin(ang)*dist;
+    d.animate([{transform:'translate(0,0) scale(1)',opacity:1},{transform:`translate(${tx}px,${ty}px) scale(${.6+Math.random()*0.6})`,opacity:0}],{duration:560+Math.random()*320,easing:'cubic-bezier(.2,.8,.2,1)'});
+    setTimeout(()=>d.remove(),980);
+    frag.appendChild(d);
+  }
+  const label=document.createElement('div');
+  label.textContent='💣 -1';
+  label.style.position='absolute'; label.style.left=(relX-12)+'px'; label.style.top=(relY-8)+'px';
+  label.style.fontWeight='900'; label.style.color='#7f1d1d'; label.style.textShadow='0 2px 6px rgba(0,0,0,.12)'; label.style.pointerEvents='none';
+  label.animate([{transform:'translateY(0)',opacity:1},{transform:'translateY(-30px)',opacity:0}],{duration:720,easing:'ease-out'});
+  setTimeout(()=>label.remove(),760); frag.appendChild(label);
+  board.appendChild(frag);
+}
+function screenShake(){ try{ document.body.animate([{transform:'translate(0,0)'},{transform:'translate(-3px,2px)'},{transform:'translate(3px,-2px)'},{transform:'translate(0,0)'}],{duration:150}); }catch(e){} }
+
+/* 泡泡消失 */
+function bubblePop(el){
+  if(!el) return;
+  el.classList.add('matched'); el.style.pointerEvents='none';
+  const anim = el.animate([
+    { transform:'translateY(0) scale(1)', opacity:1, borderRadius:'var(--tile-radius)' },
+    { transform:'translateY(-6px) scale(1.06)', opacity:1, borderRadius:'24px' },
+    { transform:'translateY(-18px) scale(0.6)', opacity:0, borderRadius:'999px' }
+  ], { duration:450, easing:'cubic-bezier(.2,.8,.2,1)' });
+  anim.addEventListener('finish', ()=>{ try{ el.remove(); }catch(e){} });
+}
+
+/* 彩带雨（通关动效） */
+function confettiRain(duration=900){
+  const board = $('board'); const rect = board.getBoundingClientRect();
+  const colors = ['#ff66b5','#ffd166','#95f9c3','#6aa9ff','#ffa4d1','#fca5a5'];
+  const count = 120;
+  for(let i=0;i<count;i++){
+    const c = document.createElement('div');
+    c.className='confetti';
+    c.style.left = (Math.random()*rect.width) + 'px';
+    c.style.background = colors[i%colors.length];
+    c.style.transform = `rotate(${Math.random()*360}deg)`;
+    board.appendChild(c);
+    const fall = c.animate([
+      { transform:`translateY(-20px) rotate(0deg)`, opacity:1 },
+      { transform:`translate(${(Math.random()*2-1)*80}px, ${rect.height+40}px) rotate(${Math.random()*720-360}deg)`, opacity:0.9 }
+    ], { duration: duration + Math.random()*600, easing:'cubic-bezier(.2,.8,.2,1)' });
+    fall.addEventListener('finish', ()=> c.remove());
+  }
+}
+
+/* 连线 */
+function drawLink(elA,elB,ok){
+  const A=centerOf(elA), B=centerOf(elB);
+  const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+  line.setAttribute('x1',A.x); line.setAttribute('y1',A.y);
+  line.setAttribute('x2',B.x); line.setAttribute('y2',B.y);
+  line.setAttribute('stroke', ok?getComputedStyle(document.body).getPropertyValue('--accent')||'#16a34a':'var(--danger)');
+  line.setAttribute('stroke-width','6'); line.setAttribute('stroke-linecap','round');
+  line.style.filter = 'drop-shadow(0 2px 4px rgba(0,0,0,.12))';
+  linksSvg.appendChild(line);
+  setTimeout(()=>{ line.style.transition='opacity .5s'; line.style.opacity='0'; setTimeout(()=> line.remove(),600); }, ok?600:300);
+}
+
+/* 本地状态 */
+let tiles=[], selected=[], timeLeft=0, timer=null, levelStartAt=0,
+    players=1, turn=0, scores=[], streaks=[], wrongStreaks=[];
+
+function renderTotalPill(){ const parts=[]; for(let i=0;i<players;i++){ parts.push(`P${i+1} ${scores[i]||0}`); } totalPill.textContent=`总积分/Total: ${parts.join(' · ')}`; }
+function buildScorePills(){ const wrap=$('scoreWrap'); wrap.innerHTML=''; for(let i=0;i<players;i++){ const pill=document.createElement('span'); pill.className='pill'; pill.id=`pill-${i}`; pill.innerHTML='P'+(i+1)+': <b id="score-'+i+'">'+(scores[i]||0)+'</b>'; pill.style.borderColor=i===turn?getComputedStyle(document.body).getPropertyValue('--accent2'):'var(--border-soft)'; wrap.appendChild(pill);} renderTotalPill(); renderLiveLeaderboard(); }
+function updateScorePills(){ for(let i=0;i<players;i++){ const sEl=$(`score-${i}`); if(sEl) sEl.textContent=String(scores[i]||0); const pill=$(`pill-${i}`); if(pill) pill.style.borderColor=i===turn?getComputedStyle(document.body).getPropertyValue('--accent2'):'var(--border-soft)'; } renderTotalPill(); renderLiveLeaderboard(); }
+function renderLiveLeaderboard(){ liveBoard.innerHTML = Array.from({length:players},(_,i)=>`<li>${i+1}. P${i+1} — ${scores[i]||0} pts${i===turn?' · ▶':''}</li>`).join(''); }
+
+function updateProgress(){
+  try{
+    const total = currentPairs.length || 1;
+    const remainingPairs = Math.max(0, Math.floor(document.querySelectorAll('.tile:not(.matched)').length/2));
+    const done = Math.max(0, total - remainingPairs);
+    const pct = Math.round(done/total*100);
+    if(progInner){ progInner.style.width = pct+'%'; }
+    if(progText){ progText.textContent = pct+'%'; }
+  }catch(e){}
+}
+function updateComboChip(){ const n = streaks[turn]||0; if(comboChip){ comboChip.textContent = `Combo x${Math.max(1,n)}`; comboChip.style.opacity = n>1? 1: .6; } }
 
 function dealLevel(){
   const need=pairsPerLevel; let chosen=[];
@@ -239,110 +470,153 @@ function dealLevel(){
   tilesWrap.innerHTML=''; linksSvg.innerHTML=''; selected=[];
   const flat=[]; currentPairs.forEach((p,idx)=>{ const key=`L${level}-${idx}`; const origKey = chosen[idx].key; flat.push({id:`${key}-a`,text:p[0],pair:key,origKey}); flat.push({id:`${key}-b`,text:p[1],pair:key,origKey}); });
   shuffle(flat); tiles=flat;
-  for(const t of tiles){ const btn=document.createElement('button'); btn.className='tile'; btn.textContent=t.text; btn.dataset.id=t.id; btn.dataset.pair=t.pair; btn.dataset.orig=t.origKey; btn.addEventListener('click',()=>onSelect(btn)); tilesWrap.appendChild(btn); }
+  for(const t of tiles){ const btn=document.createElement('button'); btn.className='tile appear'; btn.textContent=t.text; btn.dataset.id=t.id; btn.dataset.pair=t.pair; btn.dataset.orig=t.origKey; btn.addEventListener('click',()=>onSelect(btn)); tilesWrap.appendChild(btn); }
   setText('lvlPill',`Level ${level} (${diff})`); setText('pairsPill',`${currentPairs.length} 对/pairs`);
+  updateProgress(); updateComboChip();
 }
 
 function onSelect(el){
   if(el.classList.contains('matched')) return; if(selected.includes(el)) return; el.classList.add('selected'); selected.push(el);
-  if(selected.length===2){ const [a,b]=selected; const match=a.dataset.pair===b.dataset.pair && a!==b; drawLink(a,b,match); setTimeout(()=>{
+  if(selected.length===2){
+    const [a,b]=selected; const match=a.dataset.pair===b.dataset.pair && a!==b; drawLink(a,b,match);
+    setTimeout(()=>{
       if(match){
-        a.classList.remove('selected'); b.classList.remove('selected'); a.classList.add('matched'); b.classList.add('matched');
-        streaks[turn]=(streaks[turn]||0)+1; const pts=1+Math.min(4,streaks[turn]-1); scores[turn]+=pts; wrongStreaks[turn]=0; updateScorePills(); // 本地
-        changeMyScore(pts); // —— 在线：同步加分
-        const c=centerOf(a); beep(920,120,'sine',0.06);
+        a.classList.remove('selected'); b.classList.remove('selected');
+        streaks[turn]=(streaks[turn]||0)+1; const pts=1+Math.min(4,streaks[turn]-1); scores[turn]+=pts; wrongStreaks[turn]=0; updateScorePills();
+        changeMyScore(pts);
+        const m=midPoint(a,b); sfxCorrect(); spawnBubbles(m.x,m.y,20);
+        bubblePop(a); bubblePop(b);
+        updateProgress(); showCombo(streaks[turn]||1); sfxCombo(Math.min(5,streaks[turn]||1)); updateComboChip();
       } else {
-        a.classList.remove('selected'); b.classList.remove('selected'); vibrate(120);
-        streaks[turn]=0; wrongStreaks[turn]=(wrongStreaks[turn]||0)+1; // 连错统计
-        if(level>=3 && wrongStreaks[turn]>=2){ scores[turn]=Math.max(0,(scores[turn]||0)-1); showPenalty('-1'); beep(220,120,'square',0.04); changeMyScore(-1); }
-        updateScorePills();
-        turn=(turn+1)%players;
+        a.classList.remove('selected'); b.classList.remove('selected'); vibrate(120); screenShake(); sfxError();
+        streaks[turn]=0; wrongStreaks[turn]=(wrongStreaks[turn]||0)+1;
+        if(level>=3 && wrongStreaks[turn]>=2){ scores[turn]=Math.max(0,(scores[turn]||0)-1); showPenalty('-1'); const m=midPoint(a,b); spawnBomb(m.x,m.y); changeMyScore(-1); }
+        updateScorePills(); updateComboChip(); turn=(turn+1)%players;
       }
-      selected=[]; const all=Array.from(document.querySelectorAll('.tile'));
-      if(all.length>0 && all.every(t=>t.classList.contains('matched'))){ clearInterval(timer); nextLevel(); }
-  },150); }
+      selected=[]; 
+      setTimeout(()=>{
+        const remaining = document.querySelectorAll('.tile:not(.matched)').length;
+        if(remaining===0){ try{ clearInterval(timer); }catch(e){} confettiRain(); nextLevel(); }
+      }, 240);
+    },150);
+  }
 }
 
-function startTimer(){ if(timer) clearInterval(timer); timeLeft=parseInt(timerInput.value||0)||0; setText('timeLeft', timeLeft); levelStartAt=Date.now(); if(timeLeft>0){ timer=setInterval(()=>{ timeLeft--; setText('timeLeft', timeLeft); if(timeLeft<=0){ clearInterval(timer); document.querySelectorAll('.tile').forEach(t=>t.disabled=true); nextLevel(); } },1000);} }
+function startTimer(){
+  if(timer) clearInterval(timer);
+  const timeEl=$('timeLeft');
+  let timeLeft=parseInt(timerInput.value||0)||0; setText('timeLeft', timeLeft);
+  if(timeLeft>0){
+    timer=setInterval(()=>{
+      timeLeft--; setText('timeLeft', timeLeft);
+      if(timeLeft<=0){ clearInterval(timer); document.querySelectorAll('.tile').forEach(t=>t.disabled=true); confettiRain(600); nextLevel(); }
+    },1000);
+  }
+}
 
-function initPool(){ const raw=(dataEl && dataEl.value.trim()) || samples[modeEl.value]; const arr=parsePairs(raw); if(arr.length<2){ alert('请至少提供 2 对配对'); return false;} fullDataset=arr.slice(); pool=arr.slice(); shuffle(pool); bucketize(); reviewQueue=[]; usedKeys.clear(); return true; }
+function initPool(){
+  const raw=(dataEl && dataEl.value.trim()) || samples[modeEl.value];
+  const arr=parsePairs(raw);
+  if(arr.length<2){ alert('请至少提供 2 对配对'); return false;}
+  fullDataset=arr.slice(); pool=arr.slice(); shuffle(pool); bucketize(); reviewQueue=[]; usedKeys.clear(); return true;
+}
 function buildBoard(){ dealLevel(); }
 
-function startGame(){ let seedStr=(seedInput.value || new URLSearchParams(location.search).get('seed') || '').trim(); if(!seedStr){ seedStr=Math.random().toString(36).slice(2,8);} seedInput.value=seedStr; rng=mulberry32(xmur3(seedStr)()); players=parseInt(playersEl.value,10); scores=Array(players).fill(0); streaks=Array(players).fill(0); wrongStreaks=Array(players).fill(0); turn=0; buildScorePills(); phase='initial'; level=1; if(!initPool()) return; setModeStatus(); timerInput.value=120; buildBoard(); startTimer(); }
+function startGame(){
+  players = parseInt(playersEl.value,10) || 1;
+  scores=Array(players).fill(0); streaks=Array(players).fill(0); wrongStreaks=Array(players).fill(0); turn=0;
+  buildScorePills();
+  let seedStr=(seedInput.value || new URLSearchParams(location.search).get('seed') || '').trim();
+  if(!seedStr){ seedStr=Math.random().toString(36).slice(2,8);} seedInput.value=seedStr;
+  rng=mulberry32(xmur3(seedStr)());
+  phase='initial'; level=1;
+  if(!initPool()) return; setModeStatus(); timerInput.value=120; buildBoard(); startTimer();
+}
 function nextLevel(){ level++; if(phase==='initial' && pool.length===0){ phase='timed'; timerInput.value=120; } buildBoard(); startTimer(); }
 
-// ===== 在线：Firebase 同步（50+ 并发排行榜） =====
+/* Firebase 在线（Compat） */
 let fbApp=null, fbAuth=null, fbDB=null, myUID=null, myName='', myRoom='', fbReady=false; 
-const fbCDN = {
-  app: 'https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js',
-  auth: 'https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js',
-  db: 'https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js'
+const DEFAULT_FB_CONFIG = {
+  apiKey: "AIzaSyD-UMbgWjRyDroRJ87XaKt-ZBEmWqoL6aE",
+  authDomain: "word-match-game-7edab.firebaseapp.com",
+  databaseURL: "https://word-match-game-7edab-default-rtdb.firebaseio.com",
+  projectId: "word-match-game-7edab",
+  storageBucket: "word-match-game-7edab.firebasestorage.app",
+  messagingSenderId: "1067109195215",
+  appId: "1:1067109195215:web:ac076863f4db3ecbea86ba",
+  measurementId: "G-98ELE2JDNK"
 };
-
-async function fbEnsure(){ 
-  if(fbReady) return true; 
-  const cfg = EMBEDDED_FB_CONFIG; // 直接使用嵌入配置
-  const { initializeApp } = await import(fbCDN.app); 
-  const { getAuth, signInAnonymously, onAuthStateChanged } = await import(fbCDN.auth); 
-  const { getDatabase } = await import(fbCDN.db);
-  fbApp = initializeApp(cfg); fbAuth=getAuth(fbApp); fbDB=getDatabase(fbApp); 
-  await signInAnonymously(fbAuth); 
-  await new Promise(res=>{ onAuthStateChanged(fbAuth, u=>{ if(u){ myUID=u.uid; res(); } }); }); 
-  fbReady=true; 
-  return true; 
+function loadScript(src){ return new Promise((res,rej)=>{ const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=rej; document.head.appendChild(s); }); }
+async function fbEnsure(){
+  if(fbReady) return true;
+  var cfgEl = document.getElementById('olCfg');
+  var cfgText = localStorage.getItem('wmb_fb_cfg') || (cfgEl ? cfgEl.value : '');
+  var cfg=null;
+  if(cfgText && cfgText.trim()){ try{ cfg=JSON.parse(cfgText); }catch(e){ cfg=null; } }
+  if(!cfg) cfg=DEFAULT_FB_CONFIG;
+  await loadScript('https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js');
+  await loadScript('https://www.gstatic.com/firebasejs/10.12.3/firebase-auth-compat.js');
+  await loadScript('https://www.gstatic.com/firebasejs/10.12.3/firebase-database-compat.js');
+  fbApp = firebase.initializeApp(cfg);
+  fbAuth = firebase.auth();
+  fbDB = firebase.database();
+  await fbAuth.signInAnonymously();
+  fbAuth.onAuthStateChanged(u=>{ if(u){ myUID=u.uid; } });
+  fbReady=true;
+  return true;
 }
-
-function renderLiveLeaderboard(){
-  // 在 onValue 里填充，这里保持占位
-  const parts=[]; for(let i=0;i<players;i++){ parts.push(`P${i+1} ${scores[i]||0}`); } // 本地占位
-  // liveBoard.innerHTML = parts.map((t,i)=>`<li>${i+1}. ${t}</li>`).join('');
-}
-
-async function olJoin(){ 
-  if(!(await fbEnsure())) return; 
-  myName=($('olName').value||'Player').trim().slice(0,24); 
-  myRoom=($('olRoom').value||'room').trim().replace(/[^a-zA-Z0-9_-]/g,''); 
-  if(!myRoom){ alert('请输入房间号'); return; }
-  const { ref, set, onValue, onDisconnect, serverTimestamp } = await import(fbCDN.db);
-  const base=`rooms/${myRoom}`; 
-  const playerRef=ref(fbDB, `${base}/players/${myUID}`); 
-  await set(playerRef, { name: myName, online:true, joinedAt: serverTimestamp() }); 
-  try{ onDisconnect(playerRef).update({ online:false, lastSeen: serverTimestamp() }); }catch(e){}
-  const scoresRef=ref(fbDB, `${base}/scores`);
-  onValue(scoresRef, (snap)=>{ 
-    const val=snap.val()||{}; 
-    const rows = Object.entries(val).map(([uid,v])=>({ uid, name:v.name||'P', score:Number(v.score||0) })); 
-    rows.sort((a,b)=>b.score-a.score); 
-    liveBoard.innerHTML = rows.map((r,i)=>`<li>${i+1}. ${r.name} — ${r.score} pts${r.uid===myUID?' ⭐':''}</li>`).join(''); 
-    setText('olStatus',`房间 ${myRoom} · 在线人数 ${rows.length}`); 
+async function olJoin(){ if(!(await fbEnsure())) return; myName=($('olName').value||'Player').trim().slice(0,24); myRoom=($('olRoom').value||'room').trim().replace(/[^a-zA-Z0-9_-]/g,''); if(!myRoom){ alert('请输入房间号'); return; }
+  localStorage.setItem('wmb_last_name', myName); saveRoomForName(myName, myRoom);
+  const base='rooms/'+myRoom; const playerRef=fbDB.ref(base+'/players/'+myUID);
+  await playerRef.set({ name: myName, online:true, joinedAt: firebase.database.ServerValue.TIMESTAMP });
+  try{ playerRef.onDisconnect().update({ online:false, lastSeen: firebase.database.ServerValue.TIMESTAMP }); }catch(e){}
+  const scoresRef=fbDB.ref(base+'/scores');
+  scoresRef.on('value', snap=>{
+    const val=snap.val()||{};
+    const rows = Object.keys(val).map(uid=>({ uid, name:val[uid].name||'P', score:Number(val[uid].score||0) }));
+    rows.sort((a,b)=>b.score-a.score);
+    liveBoard.innerHTML = rows.map((r,i)=>`<li>${i+1}. ${r.name} — ${r.score} pts${r.uid===myUID?' ⭐':''}</li>`).join('');
+    setText('olStatus','房间 '+myRoom+' · 在线人数 '+rows.length);
   });
 }
+async function olLeave(){ if(!fbReady||!myRoom||!myUID) return; await fbDB.ref('rooms/'+myRoom+'/players/'+myUID).update({ online:false }); setText('olStatus','已离开 Left'); }
+async function changeMyScore(delta){ if(!fbReady||!myRoom||!myUID) return; const ref=fbDB.ref('rooms/'+myRoom+'/scores/'+myUID); const snap=await ref.get(); const cur=snap.exists()?Number(snap.val().score||0):0; await ref.set({ name: myName||'Player', score: Math.max(0, cur + Number(delta||0)) }); }
 
-async function olLeave(){ 
-  if(!fbReady||!myRoom||!myUID) return; 
-  const { ref, update } = await import(fbCDN.db); 
-  await update(ref(fbDB, `rooms/${myRoom}/players/${myUID}`), { online:false }); 
-  setText('olStatus','已离开 Left'); 
+/* 本地持久房间历史（按名字） */
+function roomsKey(name){ return 'wmb_rooms_'+(name||'').trim(); }
+function loadRoomsByName(name){ try{ return JSON.parse(localStorage.getItem(roomsKey(name))||'[]'); }catch(e){ return []; } }
+function renderRoomsDatalist(name){ const dl=document.getElementById('recentRooms'); if(!dl) return; dl.innerHTML=''; const list=loadRoomsByName(name); for(const r of list){ const opt=document.createElement('option'); opt.value=r; dl.appendChild(opt);} }
+function saveRoomForName(name,room){ if(!name||!room) return; const list=loadRoomsByName(name).filter(r=>r!==room); list.unshift(room); localStorage.setItem(roomsKey(name), JSON.stringify(list.slice(0,10))); renderRoomsDatalist(name); }
+
+/* 自测 */
+function runParseTests(){
+  const cases=[
+    {in:"a | 1\nb | 2", expect:2, label:'LF'},
+    {in:"a | 1\r\nb | 2\r\n", expect:2, label:'CRLF'},
+    {in:"\n\na | 1\n\n b | 2 ", expect:2, label:'trim'},
+    {in:"term | a | b | c", expect:1, label:'pipe-join'},
+    {in:"onlyterm\nterm | def", expect:1, label:'invalid-line-skip'}
+  ];
+  let ok=true; for(const c of cases){ const got=parsePairs(c.in).length; if(got!==c.expect){ ok=false; console.warn('parsePairs test failed', c.label, 'got', got, 'expect', c.expect); } }
+  try{ const _p = players; if(typeof _p!== 'number'){ ok=false; console.warn('players not a number'); } }catch(e){ ok=false; console.error('players reference error', e); }
+  console.log('self tests', ok?'OK ✅':'FAIL ❌');
 }
 
-async function changeMyScore(delta){ 
-  if(!fbReady||!myRoom||!myUID) return; 
-  const { ref, get, set } = await import(fbCDN.db); 
-  const myRef=ref(fbDB, `rooms/${myRoom}/scores/${myUID}`); 
-  const snap=await get(myRef); 
-  const cur=snap.exists()?Number(snap.val().score||0):0; 
-  await set(myRef,{ name: myName||'Player', score: Math.max(0, cur + Number(delta||0)) }); 
-}
-
-// ===== 事件绑定 =====
+/* 事件 */
 window.addEventListener('DOMContentLoaded',()=>{
   modeEl.addEventListener('change',()=>{ if(dataEl) dataEl.value=samples[modeEl.value]||''; setModeStatus(); });
   startBtn.addEventListener('click', startGame);
   shuffleBtn.addEventListener('click', buildBoard);
+  if(sndBtn) sndBtn.addEventListener('click', toggleSound);
   dataEl.value = samples[modeEl.value]; setModeStatus();
-
+  $('olApplyCfg').addEventListener('click',()=>{ const j=prompt('粘贴 Firebase Web 配置 JSON：'); if(!j) return; try{ JSON.parse(j); localStorage.setItem('wmb_fb_cfg', j); $('olCfg').value=j; alert('已保存配置'); }catch(e){ alert('JSON 无效'); } });
   $('olJoin').addEventListener('click', olJoin);
   $('olLeave').addEventListener('click', olLeave);
+  const lastName = localStorage.getItem('wmb_last_name'); if(lastName && $('olName')){ $('olName').value = lastName; renderRoomsDatalist(lastName); }
+  const nameInp=$('olName'); if(nameInp){ nameInp.addEventListener('input', ()=> renderRoomsDatalist(nameInp.value)); nameInp.addEventListener('change', ()=> renderRoomsDatalist(nameInp.value)); }
+  const saved=localStorage.getItem('wmb_fb_cfg'); if(saved){ $('olCfg').value=saved; } else { try{ $('olCfg').value = JSON.stringify(DEFAULT_FB_CONFIG, null, 2); }catch(e){} }
+  $('olStatus').textContent = '未连接 Not connected（已内置配置，可直接 Join）';
+  runParseTests();
 });
 </script>
 </body>
